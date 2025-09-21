@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "total_draws": 1189,
+    "total_draws": 1190,
     "first_draw": 1,
-    "latest_draw": 1189,
+    "latest_draw": 1190,
     "export_date": "2025-09-20T21:45:00Z",
     "version": "1.0.0"
   },
@@ -21408,6 +21408,24 @@
       "total_sales_amount": 119484685000,
       "created_at": "2025-09-20 10:45:02",
       "updated_at": "2025-09-20 10:45:02"
+    },
+    {
+      "draw_no": 1190,
+      "draw_date": "2025-09-20",
+      "numbers": [
+        7,
+        9,
+        19,
+        23,
+        26,
+        45
+      ],
+      "bonus_number": 33,
+      "first_prize_amount": 4622793813,
+      "first_prize_winners": 6,
+      "total_sales_amount": 118368861000,
+      "created_at": "2025-09-21 05:51:44",
+      "updated_at": "2025-09-21 05:51:44"
     }
   ]
 }

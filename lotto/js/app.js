@@ -266,20 +266,37 @@ class LottoApp {
         try {
             showLoading('최신 데이터를 확인하는 중...');
 
-            // 실제 구현에서는 API를 통해 새 데이터 확인
-            // 현재는 정적 사이트이므로 재로드만 수행
-            await window.lottoGenerator.loadData();
+            // API를 통해 실시간 데이터 업데이트 시도
+            const hasUpdates = await window.lottoGenerator.updateDataFromAPI();
 
-            window.lottoStorage.setLastUpdate();
-            this.loadStats();
+            if (hasUpdates) {
+                // 새로운 데이터가 있으면 UI 업데이트
+                window.lottoStorage.setLastUpdate();
+                this.loadStats();
 
-            hideLoading();
-            this.showSuccess('데이터가 최신 상태입니다.');
+                // 업데이트 버튼 상태 리셋
+                const updateBtn = document.getElementById('updateBtn');
+                if (updateBtn) {
+                    updateBtn.textContent = '최신 데이터 업데이트';
+                    updateBtn.classList.remove('highlight');
+                }
+
+                hideLoading();
+                this.showSuccess('새로운 데이터가 업데이트되었습니다!');
+            } else {
+                // 이미 최신 데이터이거나 API 실패시 정적 데이터 재로드
+                await window.lottoGenerator.loadData();
+                window.lottoStorage.setLastUpdate();
+                this.loadStats();
+
+                hideLoading();
+                this.showSuccess('데이터가 최신 상태입니다.');
+            }
 
         } catch (error) {
             console.error('데이터 업데이트 실패:', error);
             hideLoading();
-            this.showError('데이터 업데이트에 실패했습니다.');
+            this.showError('데이터 업데이트에 실패했습니다. 로컬 데이터를 사용합니다.');
         }
     }
 
@@ -335,7 +352,19 @@ class LottoApp {
         document.querySelectorAll('.chart-tab').forEach(tab => {
             tab.classList.remove('active');
         });
-        event.target.classList.add('active');
+
+        // 클릭된 탭 찾기
+        const targetTab = [...document.querySelectorAll('.chart-tab')].find(tab =>
+            (tabName === 'statistics' && tab.textContent.includes('기본')) ||
+            (tabName === 'trend' && tab.textContent.includes('추이')) ||
+            (tabName === 'correlation' && tab.textContent.includes('상관')) ||
+            (tabName === 'pattern' && tab.textContent.includes('패턴')) ||
+            (tabName === 'hotcold' && tab.textContent.includes('핫'))
+        );
+
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
 
         // 컨텐츠 표시
         document.querySelectorAll('.chart-content').forEach(content => {

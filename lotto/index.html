@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 로또 번호 생성기 - 정적 버전</title>
+    <meta name="description" content="서버 없이 동작하는 로또 번호 생성기 및 분석 도구">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 로또 번호 생성기</h1>
+            <p>완전 정적 사이트 - 서버 없이 동작하는 스마트 분석</p>
+            <div class="status-indicators">
+                <span id="dataStatus" class="status offline">데이터 로딩중...</span>
+                <span id="offlineStatus" class="status">온라인</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 데이터 관리 -->
+            <div class="section">
+                <h2>📊 데이터 관리</h2>
+                <div class="controls">
+                    <button onclick="updateLottoData()" id="updateBtn">최신 데이터 업데이트</button>
+                    <button onclick="loadStats()">통계 새로고침</button>
+                    <span id="lastUpdate">마지막 업데이트: -</span>
+                </div>
+                <div class="stats" id="stats">
+                    <div class="stat-item">
+                        <span class="value" id="total-draws">-</span>
+                        <span class="label">총 회차</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="value" id="latest-draw">-</span>
+                        <span class="label">최신 회차</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="value" id="data-size">-</span>
+                        <span class="label">데이터 크기</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 로또 번호 생성 -->
+            <div class="section">
+                <h2>🎲 로또 번호 생성</h2>
+                <div class="controls">
+                    <label>생성할 묶음 수:</label>
+                    <input type="number" id="count" value="5" min="1" max="20">
+                    <label id="recentDrawsLabel">제외할 최근 회차:</label>
+                    <input type="number" id="recentDraws" value="10" min="1" max="50">
+                    <label>
+                        <input type="checkbox" id="avoidPastCombinations" checked onchange="toggleRecentDraws()">
+                        과거 당첨 조합 제외 (권장)
+                    </label>
+                    <button onclick="generateNumbers()">번호 생성</button>
+                </div>
+
+                <div id="result"></div>
+            </div>
+
+            <!-- 내 번호 관리 -->
+            <div class="section">
+                <h2>💾 내 번호 관리</h2>
+                <div class="controls">
+                    <button onclick="saveCurrentNumbers()">현재 번호 저장</button>
+                    <button onclick="loadSavedNumbers()">저장된 번호 불러오기</button>
+                    <button onclick="clearSavedNumbers()">저장된 번호 삭제</button>
+                </div>
+                <div id="savedNumbers"></div>
+            </div>
+
+            <!-- 고급 차트 분석 -->
+            <div class="section">
+                <h2>📊 고급 차트 분석</h2>
+
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchChartTab('statistics')">기본 통계</button>
+                    <button class="chart-tab" onclick="switchChartTab('trend')">번호 추이</button>
+                    <button class="chart-tab" onclick="switchChartTab('correlation')">상관관계</button>
+                    <button class="chart-tab" onclick="switchChartTab('pattern')">패턴 분석</button>
+                    <button class="chart-tab" onclick="switchChartTab('hotcold')">핫/콜드</button>
+                </div>
+
+                <!-- 기본 통계 -->
+                <div id="statistics-content" class="chart-content active">
+                    <div class="chart-controls">
+                        <label>시작 회차:</label>
+                        <input type="number" id="statsStartDraw" placeholder="1" min="1">
+                        <label>종료 회차:</label>
+                        <input type="number" id="statsEndDraw" placeholder="최신">
+                        <button onclick="loadStatistics()">통계 조회</button>
+                        <button onclick="clearStatistics()">전체 조회</button>
+                    </div>
+                    <div id="statisticsResult"></div>
+                </div>
+
+                <!-- 번호 추이 차트 -->
+                <div id="trend-content" class="chart-content">
+                    <div class="chart-controls">
+                        <label>분석할 번호:</label>
+                        <select id="trendNumber">
+                            <option value="">번호 선택</option>
+                        </select>
+                        <label>최근 회차:</label>
+                        <select id="trendLimit">
+                            <option value="30">30회차</option>
+                            <option value="50" selected>50회차</option>
+                            <option value="100">100회차</option>
+                        </select>
+                        <button onclick="loadTrendChart()">조회</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 상관관계 차트 -->
+                <div id="correlation-content" class="chart-content">
+                    <div class="chart-controls">
+                        <label>시작 회차:</label>
+                        <input type="number" id="corrStartDraw" placeholder="1" min="1">
+                        <label>종료 회차:</label>
+                        <input type="number" id="corrEndDraw" placeholder="최신">
+                        <label>상위 쌍 개수:</label>
+                        <select id="corrTopPairs">
+                            <option value="10">10개</option>
+                            <option value="20" selected>20개</option>
+                            <option value="30">30개</option>
+                        </select>
+                        <button onclick="loadCorrelationChart()">조회</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="correlationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 패턴 분석 차트 -->
+                <div id="pattern-content" class="chart-content">
+                    <div class="chart-controls">
+                        <label>시작 회차:</label>
+                        <input type="number" id="patternStartDraw" placeholder="1" min="1">
+                        <label>종료 회차:</label>
+                        <input type="number" id="patternEndDraw" placeholder="최신">
+                        <label>분석 유형:</label>
+                        <select id="patternType">
+                            <option value="consecutive">연속번호</option>
+                            <option value="odd-even">홀짝 비율</option>
+                            <option value="zone">구간 분포</option>
+                            <option value="sum">합계 분포</option>
+                        </select>
+                        <button onclick="loadPatternChart()">조회</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="patternChart"></canvas>
+                    </div>
+                    <div id="patternStats"></div>
+                </div>
+
+                <!-- 핫/콜드 차트 -->
+                <div id="hotcold-content" class="chart-content">
+                    <div class="chart-controls">
+                        <label>최근 회차:</label>
+                        <select id="hotColdDraws">
+                            <option value="10">10회차</option>
+                            <option value="20" selected>20회차</option>
+                            <option value="30">30회차</option>
+                            <option value="50">50회차</option>
+                        </select>
+                        <button onclick="loadHotColdChart()">조회</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="hotColdChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p id="loadingText">데이터를 불러오는 중...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/lotto-core.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    }, function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

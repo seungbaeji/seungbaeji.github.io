@@ -9,6 +9,7 @@ class LottoGenerator {
         this.excludedNumbers = new Set();
         this.pastCombinations = new Set();
         this.isDataLoaded = false;
+        this.LOTTO_API_URL = 'https://www.dhlottery.co.kr/common.do?method=getLottoNumber';
     }
 
     async loadData() {
@@ -25,12 +26,136 @@ class LottoGenerator {
 
             hideLoading();
             updateDataStatus('online', `${this.lottoData.metadata.total_draws}회차 데이터 로드됨`);
+
+            // 로드 완료 후 최신 데이터 확인
+            this.checkForUpdates();
+
             return this.lottoData;
         } catch (error) {
             console.error('데이터 로드 실패:', error);
             hideLoading();
             updateDataStatus('offline', '데이터 로드 실패');
             throw error;
+        }
+    }
+
+    async fetchLatestDrawNumber() {
+        try {
+            const response = await fetch(`${this.LOTTO_API_URL}&method=getLottoNumber&drwNo=1`);
+            if (!response.ok) {
+                throw new Error(`API error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.drwNo;
+        } catch (error) {
+            console.warn('최신 회차 조회 실패 (CORS 제한 가능):', error);
+            return null;
+        }
+    }
+
+    async fetchWinningNumbers(drawNo) {
+        try {
+            const response = await fetch(`${this.LOTTO_API_URL}&drwNo=${drawNo}`);
+            if (!response.ok) {
+                throw new Error(`API error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.returnValue !== 'success') {
+                throw new Error(`API returned error: ${data.returnValue}`);
+            }
+
+            return {
+                draw_no: data.drwNo,
+                draw_date: data.drwNoDate,
+                numbers: [data.drwtNo1, data.drwtNo2, data.drwtNo3, data.drwtNo4, data.drwtNo5, data.drwtNo6],
+                bonus_number: data.bnusNo,
+                first_prize_amount: data.firstWinamnt,
+                first_prize_winners: data.firstPrzwnerCo,
+                total_sales_amount: data.totSellamnt
+            };
+        } catch (error) {
+            console.warn(`${drawNo}회차 데이터 조회 실패 (CORS 제한 가능):`, error);
+            return null;
+        }
+    }
+
+    async updateDataFromAPI() {
+        try {
+            showLoading('최신 데이터 확인 중...');
+
+            const latestAPIDrawNo = await this.fetchLatestDrawNumber();
+            if (!latestAPIDrawNo) {
+                console.log('API에서 최신 회차를 가져올 수 없습니다.');
+                hideLoading();
+                return false;
+            }
+
+            const currentLatest = this.getLatestDrawNumber();
+            if (latestAPIDrawNo <= currentLatest) {
+                console.log('이미 최신 데이터입니다.');
+                hideLoading();
+                updateDataStatus('online', `${this.lottoData.metadata.total_draws}회차 데이터 (최신)`);
+                return false;
+            }
+
+            console.log(`새로운 회차 발견: ${currentLatest + 1}회차부터 ${latestAPIDrawNo}회차까지`);
+
+            const newDraws = [];
+            for (let drawNo = currentLatest + 1; drawNo <= latestAPIDrawNo; drawNo++) {
+                const drawData = await this.fetchWinningNumbers(drawNo);
+                if (drawData) {
+                    newDraws.push(drawData);
+                    console.log(`${drawNo}회차 데이터 추가됨`);
+                }
+            }
+
+            if (newDraws.length > 0) {
+                this.lottoData.draws.push(...newDraws);
+                this.lottoData.metadata.total_draws += newDraws.length;
+                this.lottoData.metadata.latest_draw = latestAPIDrawNo;
+                this.updatePastCombinations();
+
+                updateDataStatus('online', `${this.lottoData.metadata.total_draws}회차 데이터 (${newDraws.length}개 회차 업데이트됨)`);
+                console.log(`${newDraws.length}개의 새로운 회차가 추가되었습니다.`);
+
+                hideLoading();
+                return true;
+            }
+
+            hideLoading();
+            return false;
+        } catch (error) {
+            console.error('API 데이터 업데이트 실패:', error);
+            hideLoading();
+            updateDataStatus('warning', 'API 업데이트 실패 (로컬 데이터 사용)');
+            return false;
+        }
+    }
+
+    async checkForUpdates() {
+        if (!this.isDataLoaded) return;
+
+        try {
+            const latestAPIDrawNo = await this.fetchLatestDrawNumber();
+            if (!latestAPIDrawNo) return;
+
+            const currentLatest = this.getLatestDrawNumber();
+            if (latestAPIDrawNo > currentLatest) {
+                const newCount = latestAPIDrawNo - currentLatest;
+                updateDataStatus('warning', `${newCount}개의 새로운 회차 발견 (업데이트 가능)`);
+
+                // 자동 업데이트 버튼 활성화
+                const updateBtn = document.getElementById('updateBtn');
+                if (updateBtn) {
+                    updateBtn.textContent = `새 데이터 업데이트 (${newCount}개 회차)`;
+                    updateBtn.classList.add('highlight');
+                }
+            }
+        } catch (error) {
+            console.log('업데이트 확인 중 오류 (무시됨):', error);
         }
     }
 

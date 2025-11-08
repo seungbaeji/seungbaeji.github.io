@@ -1,13 +1,16 @@
 {
   "name": "로또 번호 생성기",
   "short_name": "로또생성기",
-  "description": "서버 없이 동작하는 스마트 로또 번호 생성기 및 분석 도구",
+  "description": "로또 번호 생성기 및 분석 도구",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#667eea",
   "orientation": "portrait-primary",
-  "categories": ["games", "utilities"],
+  "categories": [
+    "games",
+    "utilities"
+  ],
   "lang": "ko",
   "dir": "ltr",
   "icons": [

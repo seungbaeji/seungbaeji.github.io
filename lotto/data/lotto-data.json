@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "total_draws": 1190,
+    "total_draws": 1196,
     "first_draw": 1,
-    "latest_draw": 1190,
+    "latest_draw": 1196,
     "export_date": "2025-09-20T21:45:00Z",
     "version": "1.0.0"
   },
@@ -21426,6 +21426,114 @@
       "total_sales_amount": 118368861000,
       "created_at": "2025-09-21 05:51:44",
       "updated_at": "2025-09-21 05:51:44"
+    },
+    {
+      "draw_no": 1191,
+      "draw_date": "2025-09-27",
+      "numbers": [
+        1,
+        4,
+        11,
+        12,
+        20,
+        41
+      ],
+      "bonus_number": 2,
+      "first_prize_amount": 1536334355,
+      "first_prize_winners": 18,
+      "total_sales_amount": 121272809000,
+      "created_at": "2025-11-08 07:46:26",
+      "updated_at": "2025-11-08 07:46:26"
+    },
+    {
+      "draw_no": 1192,
+      "draw_date": "2025-10-04",
+      "numbers": [
+        10,
+        16,
+        23,
+        36,
+        39,
+        40
+      ],
+      "bonus_number": 11,
+      "first_prize_amount": 1079546587,
+      "first_prize_winners": 29,
+      "total_sales_amount": 129050196000,
+      "created_at": "2025-11-08 07:46:26",
+      "updated_at": "2025-11-08 07:46:26"
+    },
+    {
+      "draw_no": 1193,
+      "draw_date": "2025-10-11",
+      "numbers": [
+        6,
+        9,
+        16,
+        19,
+        24,
+        28
+      ],
+      "bonus_number": 17,
+      "first_prize_amount": 1717013508,
+      "first_prize_winners": 16,
+      "total_sales_amount": 118676603000,
+      "created_at": "2025-11-08 07:46:26",
+      "updated_at": "2025-11-08 07:46:26"
+    },
+    {
+      "draw_no": 1194,
+      "draw_date": "2025-10-18",
+      "numbers": [
+        3,
+        13,
+        15,
+        24,
+        33,
+        37
+      ],
+      "bonus_number": 2,
+      "first_prize_amount": 985155349,
+      "first_prize_winners": 28,
+      "total_sales_amount": 121085706000,
+      "created_at": "2025-11-08 07:46:26",
+      "updated_at": "2025-11-08 07:46:26"
+    },
+    {
+      "draw_no": 1195,
+      "draw_date": "2025-10-25",
+      "numbers": [
+        3,
+        15,
+        27,
+        33,
+        34,
+        36
+      ],
+      "bonus_number": 37,
+      "first_prize_amount": 2939186738,
+      "first_prize_winners": 10,
+      "total_sales_amount": 122918013000,
+      "created_at": "2025-11-08 07:46:26",
+      "updated_at": "2025-11-08 07:46:26"
+    },
+    {
+      "draw_no": 1196,
+      "draw_date": "2025-11-01",
+      "numbers": [
+        8,
+        12,
+        15,
+        29,
+        40,
+        45
+      ],
+      "bonus_number": 14,
+      "first_prize_amount": 2001627550,
+      "first_prize_winners": 15,
+      "total_sales_amount": 121645432000,
+      "created_at": "2025-11-08 07:46:25",
+      "updated_at": "2025-11-08 07:46:25"
     }
   ]
 }
